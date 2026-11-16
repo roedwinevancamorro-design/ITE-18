@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GradeTrack - Web-Based Grade Submission System (SMCC SHS)</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <!-- Google Fonts Inter -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            csu: {
+              green: '#006837',
+              gold: '#FBB040',
+              dark: '#0f291e',
+              light: '#f0fdf4'
+            },
+            smcc: {
+              blue: '#1e3a8a',
+              gold: '#d97706'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col">
+
+  <!-- TOP BRANDING BAR (CSU CCIS Header Header) -->
+  <header class="bg-gradient-to-r from-csu-dark via-csu-green to-emerald-900 text-white shadow-md border-b-4 border-csu-gold">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-wrap items-center justify-between gap-4">
+      
+      <!-- Logo & Title Header -->
+      <div class="flex items-center space-x-3">
+        <div class="w-11 h-11 bg-white text-csu-green rounded-lg flex items-center justify-center font-bold text-xl shadow-inner border border-csu-gold">
+          <i class="fa-solid me-0.5 fa-graduation-cap"></i>
+        </div>
+        <div>
+          <div class="flex items-center space-x-2">
+            <h1 class="font-bold text-lg leading-tight tracking-wide">CARAGA STATE UNIVERSITY</h1>
+            <span class="bg-csu-gold text-csu-dark text-[10px] font-extrabold px-1.5 py-0.5 rounded tracking-wider uppercase">CSU CCIS</span>
+          </div>
+          <p class="text-xs text-emerald-200 font-medium tracking-tight">GradeTrack System • SMCC Senior High School</p>
+        </div>
+      </div>
+
+      <!-- Tagline & Role Switcher -->
+      <div class="flex items-center space-x-4">
+        <div class="hidden lg:block text-right border-r border-emerald-600/60 pr-4">
+          <p class="text-[11px] uppercase tracking-wider text-emerald-200 font-semibold">Motto</p>
+          <p class="text-xs italic text-amber-300 font-medium">"Competence • Service • Uprightness"</p>
+        </div>
+
+        <!-- Role Selector Switcher -->
+        <div class="bg-emerald-950/70 p-1.5 rounded-lg border border-emerald-500/30 flex items-center space-x-2">
+          <span class="text-xs text-emerald-200 font-medium pl-1"><i class="fa-solid fa-user-shield mr-1 text-csu-gold"></i> Role:</span>
+          <select id="roleSelector" onchange="switchRole(this.value)" class="bg-emerald-900 text-white text-xs font-semibold py-1 px-2.5 rounded border border-emerald-600 focus:outline-none focus:ring-2 focus:ring-csu-gold cursor-pointer">
+            <option value="teacher">SHS Teacher (Luck Y Meh)</option>
+            <option value="admin">Academic Coordinator / Admin (Kara Danvers)</option>
+          </select>
+        </div>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <div class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col md:flex-row gap-6">
+
+    <!-- SIDEBAR NAVIGATION -->
+    <aside class="w-full md:w-64 flex-shrink-0 space-y-4">
+      <!-- User Info Card -->
+      <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200/80">
+        <div class="flex items-center space-x-3">
+          <div id="userAvatar" class="w-10 h-10 rounded-full bg-emerald-100 text-csu-green flex items-center justify-center font-bold text-base border border-emerald-300">
+            AR
+          </div>
+          <div>
+            <h3 id="userName" class="text-sm font-bold text-slate-800">Luck Y Meh</h3>
+            <p id="userRoleBadge" class="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full inline-block mt-0.5 border border-emerald-200">
+              SHS Faculty
+            </p>
+          </div>
+        </div>
+        <div class="mt-3 pt-3 border-t border-slate-100 text-xs text-slate-500 space-y-1">
+          <p class="flex items-center justify-between"><span>Section:</span> <strong id="userSection" class="text-slate-700">ABJI1 - STEM</strong></p>
+          <p class="flex items-center justify-between"><span>Academic Year:</span> <strong class="text-slate-700">2026-2027 1st Sem</strong></p>
+        </div>
+      </div>
+
+      <!-- Navigation Menu -->
+      <nav class="bg-white rounded-xl shadow-sm border border-slate-200/80 overflow-hidden p-2 space-y-1">
+        <button onclick="switchTab('dashboard')" id="nav-dashboard" class="w-full text-left px-3 py-2.5 rounded-lg text-xs font-semibold flex items-center space-x-3 transition bg-csu-green text-white">
+          <i class="fa-solid fa-chart-pie w-4 text-center"></i>
+          <span>Dashboard Overview</span>
+        </button>
+        <button onclick="switchTab('gradesheets')" id="nav-gradesheets" class="w-full text-left px-3 py-2.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 flex items-center space-x-3 transition">
+          <i class="fa-solid fa-file-signature w-4 text-center"></i>
+          <span id="nav-gradesheets-label">My Grade Sheets</span>
+        </button>
+        <button onclick="switchTab('deadlines')" id="nav-deadlines" class="w-full text-left px-3 py-2.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 flex items-center space-x-3 transition">
+          <i class="fa-solid fa-clock w-4 text-center"></i>
+          <span>Deadlines & Tracking</span>
+        </button>
+        <button onclick="switchTab('audit')" id="nav-audit" class="w-full text-left px-3 py-2.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 flex items-center space-x-3 transition">
+          <i class="fa-solid fa-history w-4 text-center"></i>
+          <span>Submission History</span>
+        </button>
+      </nav>
+
+      <!-- System Quick Status -->
+      <div class="bg-gradient-to-br from-slate-900 to-slate-800 text-white p-4 rounded-xl shadow-sm text-xs space-y-3">
+        <div class="flex items-center justify-between border-b border-slate-700 pb-2">
+          <span class="font-semibold text-slate-300">Grade Validation Rules</span>
+          <span class="bg-emerald-500/20 text-emerald-400 text-[10px] px-1.5 py-0.5 rounded font-mono">ACTIVE</span>
+        </div>
+        <ul class="space-y-1.5 text-slate-300 text-[11px] list-disc list-inside">
+          <li>Valid Grade Range: <strong class="text-amber-300">65.0 - 100.0</strong></li>
+          <li>Auto-flag missing entries</li>
+          <li>Strict lock on <span class="text-emerald-400">Approved</span> sheets</li>
+        </ul>
+      </div>
+    </aside>
+
+    <!-- CONTENT AREA -->
+    <main class="flex-1 space-y-6">
+
+      <!-- TOP METRIC CARDS (KPIs) -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4" id="kpiContainer">
+        <!-- JS injects KPI cards depending on role -->
+      </div>
+
+      <!-- MAIN TAB CONTENT -->
+
+      <!-- TAB 1: DASHBOARD OVERVIEW -->
+      <section id="tab-dashboard" class="space-y-6">
+        
+        <!-- DEADLINE ALERT BANNER -->
+        <div class="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-xl shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div class="flex items-start space-x-3">
+            <div class="p-2 bg-amber-100 text-amber-700 rounded-lg">
+              <i class="fa-solid fa-triangle-exclamation text-lg"></i>
+            </div>
+            <div>
+              <h4 class="text-xs font-bold text-amber-900 uppercase tracking-wider">Upcoming Grade Deadline Alert</h4>
+              <p class="text-xs text-amber-800 mt-0.5">First Quarter Final Grade Submissions close in <strong class="text-amber-950 font-bold" id="countdownTimer">02 days : 08 hrs : 45 mins</strong>.</p>
+            </div>
+          </div>
+          <button onclick="switchTab('gradesheets')" class="text-xs bg-amber-600 hover:bg-amber-700 text-white font-semibold px-3 py-1.5 rounded-lg shadow-sm transition flex-shrink-0">
+            View Pending Sheets
+          </button>
+        </div>
+
+        <!-- RECENT ACTIVITY & SUBMISSION PROGRESS -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          
+          <!-- Recent Submissions Table -->
+          <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-slate-200/80 p-5">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h3 class="font-bold text-slate-800 text-sm">Recent Grade Sheet Activity</h3>
+                <p class="text-xs text-slate-500">Latest updates across assigned SHS subjects</p>
+              </div>
+              <button onclick="switchTab('gradesheets')" class="text-xs text-csu-green font-semibold hover:underline">View All</button>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs">
+                <thead>
+                  <tr class="bg-slate-50 text-slate-500 border-b border-slate-200 uppercase tracking-wider text-[10px]">
+                    <th class="py-2.5 px-3">Subject / Section</th>
+                    <th class="py-2.5 px-3">Strand</th>
+                    <th class="py-2.5 px-3">Status</th>
+                    <th class="py-2.5 px-3">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="recentActivityTable" class="divide-y divide-slate-100">
+                  <!-- Dynamically populated -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Overall Submission Gauge & Quick Info -->
+          <div class="bg-white rounded-xl shadow-sm border border-slate-200/80 p-5 flex flex-col justify-between space-y-4">
+            <div>
+              <h3 class="font-bold text-slate-800 text-sm mb-1">Semester Compliance Rate</h3>
+              <p class="text-xs text-slate-500 mb-4">Overall grade submission compliance</p>
+              
+              <!-- Progress Bar -->
+              <div class="space-y-2">
+                <div class="flex justify-between text-xs font-semibold">
+                  <span class="text-slate-600">Completion Target</span>
+                  <span class="text-csu-green font-bold" id="completionPercentage">75%</span>
+                </div>
+                <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden p-0.5 border border-slate-200">
+                  <div id="completionProgressBar" class="bg-csu-green h-full rounded-full transition-all duration-500" style="width: 75%"></div>
+                </div>
+              </div>
+
+              <!-- Quick Breakdown List -->
+              <div class="mt-6 space-y-2.5 text-xs">
+                <div class="flex justify-between items-center text-slate-600">
+                  <span class="flex items-center"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 mr-2"></span> Approved</span>
+                  <span class="font-bold text-slate-800" id="approvedCount">3</span>
+                </div>
+                <div class="flex justify-between items-center text-slate-600">
+                  <span class="flex items-center"><span class="w-2.5 h-2.5 rounded-full bg-amber-500 mr-2"></span> Pending Review</span>
+                  <span class="font-bold text-slate-800" id="pendingCount">1</span>
+                </div>
+                <div class="flex justify-between items-center text-slate-600">
+                  <span class="flex items-center"><span class="w-2.5 h-2.5 rounded-full bg-rose-500 mr-2"></span> Returned with Remarks</span>
+                  <span class="font-bold text-slate-800" id="returnedCount">1</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-slate-50 p-3 rounded-lg border border-slate-200/70 text-[11px] text-slate-600 flex items-center justify-between">
+              <span><i class="fa-solid fa-shield-halved text-csu-green mr-1.5"></i> Verification Engine:</span>
+              <span class="font-semibold text-emerald-700">Online & Ready</span>
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- TAB 2: GRADE SHEETS MANAGEMENT -->
+      <section id="tab-gradesheets" class="hidden space-y-4">
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200/80 p-5">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5 pb-4 border-b border-slate-100">
+            <div>
+              <h2 class="font-bold text-slate-800 text-base" id="gradeSheetsTitle">Grade Sheet Directory</h2>
+              <p class="text-xs text-slate-500">Manage, encode, and submit grades for assigned senior high sections.</p>
+            </div>
+            <!-- Search & Filter Controls -->
+            <div class="flex items-center space-x-2">
+              <input type="text" id="sheetSearchInput" onkeyup="filterGradeSheets()" placeholder="Search subject or section..." class="text-xs bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-csu-green w-48 sm:w-64" />
+              <select id="statusFilter" onchange="filterGradeSheets()" class="text-xs bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-csu-green">
+                <option value="ALL">All Statuses</option>
+                <option value="DRAFT">Draft</option>
+                <option value="SUBMITTED">Submitted</option>
+                <option value="APPROVED">Approved</option>
+                <option value="RETURNED">Returned</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Main Table -->
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead>
+                <tr class="bg-slate-100/80 text-slate-600 border-b border-slate-200 uppercase tracking-wider text-[10px]">
+                  <th class="py-3 px-4">Subject Code & Title</th>
+                  <th class="py-3 px-4">Grade & Section</th>
+                  <th class="py-3 px-4">Strand</th>
+                  <th class="py-3 px-4">Deadline</th>
+                  <th class="py-3 px-4">Status</th>
+                  <th class="py-3 px-4 text-center">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="gradeSheetsTable" class="divide-y divide-slate-100">
+                <!-- Dynamically rendered rows -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 3: DEADLINES & TRACKING -->
+      <section id="tab-deadlines" class="hidden space-y-4">
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200/80 p-5">
+          <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+            <div>
+              <h2 class="font-bold text-slate-800 text-base">Grading Period Deadlines</h2>
+              <p class="text-xs text-slate-500">SMCC SHS Schedule and Extension Management</p>
+            </div>
+            <div id="adminDeadlineControls" class="hidden">
+              <button onclick="openDeadlineModal()" class="text-xs bg-csu-green hover:bg-emerald-700 text-white font-semibold px-3 py-2 rounded-lg transition shadow-sm">
+                <i class="fa-solid fa-plus mr-1"></i> Add / Extend Deadline
+              </button>
+            </div>
+          </div>
+
+          <div class="space-y-3" id="deadlinesList">
+            <!-- Dynamically Rendered -->
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 4: SUBMISSION HISTORY / AUDIT LOG -->
+      <section id="tab-audit" class="hidden space-y-4">
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200/80 p-5">
+          <div class="mb-4 pb-3 border-b border-slate-100">
+            <h2 class="font-bold text-slate-800 text-base">Audit Trail & Submission History</h2>
+            <p class="text-xs text-slate-500">Immutable record of grade submissions, revisions, and approval decisions (FR-007)</p>
+          </div>
+
+          <div class="space-y-4" id="auditLogsContainer">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- MODAL 1: ENCODE / EDIT GRADE SHEET (FR-002, FR-003, UC-02, UC-03) -->
+  <div id="gradeModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden border border-slate-200">
+      
+      <!-- Modal Header -->
+      <div class="bg-csu-dark text-white px-6 py-4 flex items-center justify-between border-b-2 border-csu-gold">
+        <div>
+          <div class="flex items-center space-x-2">
+            <h3 id="modalSubjectCode" class="text-base font-bold text-amber-300">CS 101</h3>
+            <span id="modalSectionBadge" class="bg-emerald-800 text-emerald-200 text-[10px] font-semibold px-2 py-0.5 rounded">ABJI1 - STEM</span>
+          </div>
+          <p id="modalSubjectTitle" class="text-xs text-emerald-100 mt-0.5">Software Engineering & Development</p>
+        </div>
+        <button onclick="closeGradeModal()" class="text-slate-300 hover:text-white text-lg px-2"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <!-- Remarks Alert Banner (If Returned for Revision) -->
+      <div id="returnedRemarksBanner" class="hidden bg-rose-50 border-b border-rose-200 p-4 flex items-start space-x-3">
+        <i class="fa-solid fa-circle-exclamation text-rose-600 text-lg mt-0.5"></i>
+        <div class="text-xs">
+          <strong class="text-rose-900 font-bold block">Returned for Revision by Coordinator:</strong>
+          <span id="modalRemarksText" class="text-rose-800 italic">"Please verify student #3 final grade calculation."</span>
+        </div>
+      </div>
+
+      <!-- Validation Error Alert Banner -->
+      <div id="validationAlert" class="hidden bg-amber-50 border-b border-amber-200 p-3 px-6 flex items-center justify-between text-xs text-amber-900">
+        <span class="flex items-center font-medium"><i class="fa-solid fa-triangle-exclamation text-amber-600 mr-2 text-sm"></i> <span id="validationMessage">Validation Alert</span></span>
+        <span class="text-[10px] bg-amber-200 font-bold px-2 py-0.5 rounded text-amber-800">VALIDATION FLAG</span>
+      </div>
+
+      <!-- Modal Body (Roster Spreadsheet Table) -->
+      <div class="p-6 overflow-y-auto flex-1 custom-scrollbar space-y-4">
+        
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center text-xs gap-2">
+          <p class="text-slate-500">Enter grades for students below. All numerical grades must be between <strong class="text-slate-800">65.0 and 100.0</strong>.</p>
+          <div class="flex items-center space-x-2">
+            <span class="text-slate-600 font-medium">Auto-Calculate Final Grade:</span>
+            <span class="bg-emerald-100 text-csu-green text-[10px] font-bold px-2 py-0.5 rounded">Midterm (50%) + Final (50%)</span>
+          </div>
+        </div>
+
+        <table class="w-full text-left text-xs border border-slate-200 rounded-lg overflow-hidden">
+          <thead>
+            <tr class="bg-slate-100 text-slate-700 uppercase text-[10px] tracking-wider border-b border-slate-200">
+              <th class="p-3 w-12 text-center">#</th>
+              <th class="p-3">Student Name</th>
+              <th class="p-3 w-32">Midterm (65-100)</th>
+              <th class="p-3 w-32">Final Exam (65-100)</th>
+              <th class="p-3 w-28 text-center">Computed Average</th>
+              <th class="p-3 w-24 text-center">Status</th>
+            </tr>
+          </thead>
+          <tbody id="studentRosterBody" class="divide-y divide-slate-100">
+            <!-- Dynamically populated roster rows -->
+          </tbody>
+        </table>
+
+      </div>
+
+      <!-- Modal Footer Actions -->
+      <div class="bg-slate-50 px-6 py-4 border-t border-slate-200 flex flex-wrap items-center justify-between gap-3">
+        <button onclick="closeGradeModal()" class="text-xs font-semibold px-4 py-2 text-slate-600 hover:text-slate-800 hover:bg-slate-200 rounded-lg transition">
+          Cancel
+        </button>
+
+        <div class="flex items-center space-x-2" id="modalTeacherActions">
+          <button onclick="saveDraft()" class="text-xs bg-slate-200 hover:bg-slate-300 text-slate-800 font-semibold px-4 py-2 rounded-lg transition">
+            <i class="fa-solid fa-floppy-disk mr-1"></i> Save Draft
+          </button>
+          <button onclick="submitGradeSheet()" class="text-xs bg-csu-green hover:bg-emerald-700 text-white font-semibold px-5 py-2 rounded-lg shadow-md transition flex items-center">
+            <i class="fa-solid fa-paper-plane mr-1.5"></i> Validate & Submit
+          </button>
+        </div>
+
+        <!-- Admin Actions Inside Modal -->
+        <div class="flex items-center space-x-2 hidden" id="modalAdminActions">
+          <button onclick="adminDecision('RETURN')" class="text-xs bg-rose-600 hover:bg-rose-700 text-white font-semibold px-4 py-2 rounded-lg transition shadow-sm">
+            <i class="fa-solid fa-rotate-left mr-1"></i> Return with Remarks
+          </button>
+          <button onclick="adminDecision('APPROVE')" class="text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-5 py-2 rounded-lg transition shadow-md">
+            <i class="fa-solid fa-circle-check mr-1.5"></i> Approve Grade Sheet
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MODAL 2: ADMIN REMARKS MODAL -->
+  <div id="remarksModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
+    <div class="bg-white rounded-xl shadow-xl max-w-md w-full p-5 space-y-4 border border-slate-200">
+      <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+        <h3 class="font-bold text-slate-800 text-sm">Return Grade Sheet for Revision</h3>
+        <button onclick="closeRemarksModal()" class="text-slate-400 hover:text-slate-600 text-xs"><i class="fa-solid fa-xmark text-sm"></i></button>
+      </div>
+      <p class="text-xs text-slate-600">Please provide clear remarks or reason for returning this grade sheet to the teacher.</p>
+      <textarea id="adminRemarksInput" rows="3" class="w-full text-xs p-2.5 bg-slate-50 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500" placeholder="Type correction instructions here..."></textarea>
+      <div class="flex justify-end space-x-2 pt-2">
+        <button onclick="closeRemarksModal()" class="text-xs px-3 py-1.5 text-slate-600 hover:bg-slate-100 rounded-lg font-medium">Cancel</button>
+        <button onclick="confirmReturnWithRemarks()" class="text-xs bg-rose-600 hover:bg-rose-700 text-white font-semibold px-4 py-1.5 rounded-lg shadow-sm">Confirm Return</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 text-white text-xs px-4 py-3 rounded-xl shadow-2xl flex items-center space-x-3 transform translate-y-20 opacity-0 transition-all duration-300 z-50 border border-slate-700">
+    <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400 text-base"></i>
+    <div>
+      <h5 id="toastTitle" class="font-bold text-white">Notification</h5>
+      <p id="toastMessage" class="text-slate-300 text-[11px]">Operation completed successfully.</p>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="bg-slate-900 text-slate-400 text-xs py-6 border-t border-slate-800 mt-auto">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-4">
+      <div class="flex items-center space-x-2">
+        <div class="w-6 h-6 bg-csu-green text-white rounded flex items-center justify-center font-bold text-xs">C</div>
+        <p class="text-slate-300 font-medium">GradeTrack System • Caraga State University (CSU CCIS Project)</p>
+      </div>
+      <p class="text-slate-500 text-[11px]">Designed for Saint Michael College of Caraga (SMCC) Senior High School</p>
+    </div>
+  </footer>
+
+  <!-- SYSTEM JAVASCRIPT LOGIC -->
+  <script>
+    // --- STATE MANAGEMENT ---
+    let currentRole = 'teacher'; // 'teacher' or 'admin'
+    let currentTab = 'dashboard';
+    let activeSheetId = null;
+
+    // Initial Mock Grade Sheets Data
+    let gradeSheets = [
+      {
+        id: 'GS-101',
+        subjectCode: 'CS 101',
+        subjectTitle: 'Software Engineering 1',
+        section: 'ABJI1',
+        strand: 'STEM',
+        deadline: '2026-10-30',
+        status: 'RETURNED', // DRAFT, SUBMITTED, APPROVED, RETURNED
+        remarks: 'Please review Student #2 Final exam grade (out of bounds input noted earlier).',
+        lastUpdated: '2026-10-22 14:30',
+        students: [
+          { id: 1, name: 'Dela Cruz, Juan', midterm: 88, final: 92 },
+          { id: 2, name: 'Santos, Maria', midterm: 78, final: 62 }, // Invalid final grade (below 65) for testing validation!
+          { id: 3, name: 'Reyes, Mark', midterm: 90, final: 95 },
+          { id: 4, name: 'Alvarez, Princess', midterm: 85, final: 87 }
+        ]
+      },
+      {
+        id: 'GS-102',
+        subjectCode: 'EM 102',
+        subjectTitle: 'Empowerment Technologies',
+        section: 'ABJQ1',
+        strand: 'TVL-ICT',
+        deadline: '2026-10-30',
+        status: 'SUBMITTED',
+        remarks: '',
+        lastUpdated: '2026-10-24 09:15',
+        students: [
+          { id: 1, name: 'Torres, Angela', midterm: 89, final: 91 },
+          { id: 2, name: 'Flores, Benjamin', midterm: 84, final: 86 },
+          { id: 3, name: 'Gomez, Clara', midterm: 92, final: 94 }
+        ]
+      },
+      {
+        id: 'GS-103',
+        subjectCode: 'MATH 201',
+        subjectTitle: 'General Mathematics',
+        section: 'ABJI1',
+        strand: 'STEM',
+        deadline: '2026-10-15',
+        status: 'APPROVED',
+        remarks: 'All grades verified.',
+        lastUpdated: '2026-10-14 16:00',
+        students: [
+          { id: 1, name: 'Dela Cruz, Juan', midterm: 90, final: 91 },
+          { id: 2, name: 'Santos, Maria', midterm: 85, final: 88 }
+        ]
+      },
+      {
+        id: 'GS-104',
+        subjectCode: 'RES 101',
+        subjectTitle: 'Practical Research 1',
+        section: 'ABJM1',
+        strand: 'HUMSS',
+        deadline: '2026-11-05',
+        status: 'DRAFT',
+        remarks: '',
+        lastUpdated: '2026-10-20 11:00',
+        students: [
+          { id: 1, name: 'Bautista, Kevin', midterm: 88, final: null }, // missing field
+          { id: 2, name: 'Villanueva, Sarah', midterm: 92, final: 90 }
+        ]
+      }
+    ];
+
+    // Submission Audit Logs (FR-007)
+    let auditLogs = [
+      { timestamp: '2026-10-24 09:15', user: 'Luck Y Meh (Teacher)', action: 'SUBMITTED', sheet: 'EM 102 - ABJQ1', details: 'Submitted grade sheet for approval.' },
+      { timestamp: '2026-10-22 14:30', user: 'Kara Danvers (Coordinator)', action: 'RETURNED', sheet: 'CS 101 - ABJI1', details: 'Returned for revision with remark: "Please review Student #2 Final grade".' },
+      { timestamp: '2026-10-14 16:00', user: 'Kara Danvers (Coordinator)', action: 'APPROVED', sheet: 'MATH 201 - ABJI1', details: 'Official grade sheet approved and locked.' },
+      { timestamp: '2026-10-10 10:00', user: 'Luck Y Meh (Teacher)', action: 'DRAFT_SAVED', sheet: 'RES 101 - ABJM1', details: 'Draft saved locally.' }
+    ];
+
+    // INITIALIZATION
+    window.onload = function() {
+      switchRole('teacher');
+      renderKPIs();
+      renderRecentActivity();
+      renderGradeSheets();
+      renderDeadlines();
+      renderAuditLogs();
+    };
+
+    // --- ROLE SWITCHING ---
+    function switchRole(role) {
+      currentRole = role;
+      const avatar = document.getElementById('userAvatar');
+      const name = document.getElementById('userName');
+      const badge = document.getElementById('userRoleBadge');
+      const section = document.getElementById('userSection');
+      const navLabel = document.getElementById('nav-gradesheets-label');
+      const adminDeadlineControls = document.getElementById('adminDeadlineControls');
+
+      if (role === 'teacher') {
+        avatar.innerText = 'LM';
+        name.innerText = 'Luck Y Meh';
+        badge.innerText = 'SHS Faculty / Lead';
+        badge.className = 'text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full inline-block mt-0.5 border border-emerald-200';
+        section.innerText = 'ABJI1 - STEM';
+        navLabel.innerText = 'My Grade Sheets';
+        adminDeadlineControls.classList.add('hidden');
+      } else {
+        avatar.innerText = 'KD';
+        name.innerText = 'Prof. Kara Danvers';
+        badge.innerText = 'Academic Coordinator';
+        badge.className = 'text-[11px] font-semibold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-full inline-block mt-0.5 border border-amber-200';
+        section.innerText = 'All SHS Strands';
+        navLabel.innerText = 'All Submission Sheets';
+        adminDeadlineControls.classList.remove('hidden');
+      }
+
+      renderKPIs();
+      renderRecentActivity();
+      renderGradeSheets();
+      showToast('Role Switched', `Active view updated to ${role === 'teacher' ? 'Teacher' : 'Academic Coordinator'}.`);
+    }
+
+    // --- NAVIGATION TABS ---
+    function switchTab(tabId) {
+      currentTab = tabId;
+      ['dashboard', 'gradesheets', 'deadlines', 'audit'].forEach(t => {
+        document.getElementById(`tab-${t}`).classList.add('hidden');
+        document.getElementById(`nav-${t}`).className = 'w-full text-left px-3 py-2.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100 flex items-center space-x-3 transition';
+      });
+
+      document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+      document.getElementById(`nav-${tabId}`).className = 'w-full text-left px-3 py-2.5 rounded-lg text-xs font-semibold flex items-center space-x-3 transition bg-csu-green text-white';
+    }
+
+    // --- KPI CARDS RENDERING ---
+    function renderKPIs() {
+      const container = document.getElementById('kpiContainer');
+      const total = gradeSheets.length;
+      const approved = gradeSheets.filter(s => s.status === 'APPROVED').length;
+      const submitted = gradeSheets.filter(s => s.status === 'SUBMITTED').length;
+      const returned = gradeSheets.filter(s => s.status === 'RETURNED').length;
+
+      container.innerHTML = `
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200/80">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold text-slate-500">Assigned Sheets</span>
+            <span class="p-2 bg-blue-50 text-blue-600 rounded-lg text-xs"><i class="fa-solid fa-folder-open"></i></span>
+          </div>
+          <p class="text-xl font-bold text-slate-800 mt-2">${total}</p>
+          <span class="text-[10px] text-slate-400">Total active grade sheets</span>
+        </div>
+
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200/80">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold text-slate-500">Approved</span>
+            <span class="p-2 bg-emerald-50 text-emerald-600 rounded-lg text-xs"><i class="fa-solid fa-circle-check"></i></span>
+          </div>
+          <p class="text-xl font-bold text-emerald-600 mt-2">${approved}</p>
+          <span class="text-[10px] text-emerald-600 font-medium">Locked & Finalized</span>
+        </div>
+
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200/80">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold text-slate-500">${currentRole === 'admin' ? 'Awaiting Review' : 'Submitted'}</span>
+            <span class="p-2 bg-amber-50 text-amber-600 rounded-lg text-xs"><i class="fa-solid fa-clock font-bold"></i></span>
+          </div>
+          <p class="text-xl font-bold text-amber-600 mt-2">${submitted}</p>
+          <span class="text-[10px] text-amber-600 font-medium">Pending Coordinator action</span>
+        </div>
+
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200/80">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold text-slate-500">Returned</span>
+            <span class="p-2 bg-rose-50 text-rose-600 rounded-lg text-xs"><i class="fa-solid fa-rotate-left"></i></span>
+          </div>
+          <p class="text-xl font-bold text-rose-600 mt-2">${returned}</p>
+          <span class="text-[10px] text-rose-600 font-medium">Requires Revision</span>
+        </div>
+      `;
+
+      // Update Dashboard progress gauge
+      document.getElementById('approvedCount').innerText = approved;
+      document.getElementById('pendingCount').innerText = submitted;
+      document.getElementById('returnedCount').innerText = returned;
+      const rate = Math.round((approved / total) * 100);
+      document.getElementById('completionPercentage').innerText = `${rate}%`;
+      document.getElementById('completionProgressBar').style.width = `${rate}%`;
+    }
+
+    // --- RECENT ACTIVITY TABLE ---
+    function renderRecentActivity() {
+      const tbody = document.getElementById('recentActivityTable');
+      tbody.innerHTML = '';
+
+      gradeSheets.forEach(sheet => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50/80 transition';
+        tr.innerHTML = `
+          <td class="py-2.5 px-3">
+            <strong class="text-slate-800 font-semibold block">${sheet.subjectCode} - ${sheet.subjectTitle}</strong>
+            <span class="text-[10px] text-slate-400">Section ${sheet.section}</span>
+          </td>
+          <td class="py-2.5 px-3 font-medium text-slate-600">${sheet.strand}</td>
+          <td class="py-2.5 px-3">${getStatusBadge(sheet.status)}</td>
+          <td class="py-2.5 px-3">
+            <button onclick="openGradeModal('${sheet.id}')" class="text-xs font-semibold text-csu-green hover:underline">
+              ${currentRole === 'admin' ? 'Review Sheet' : 'Open Sheet'}
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // --- RENDER GRADE SHEETS LIST ---
+    function renderGradeSheets() {
+      const tbody = document.getElementById('gradeSheetsTable');
+      tbody.innerHTML = '';
+
+      gradeSheets.forEach(sheet => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50/80 transition';
+        tr.innerHTML = `
+          <td class="py-3 px-4">
+            <strong class="text-slate-800 text-xs block font-bold">${sheet.subjectCode}</strong>
+            <span class="text-slate-500 text-[11px]">${sheet.subjectTitle}</span>
+          </td>
+          <td class="py-3 px-4 font-semibold text-slate-700">${sheet.section}</td>
+          <td class="py-3 px-4 text-slate-600">${sheet.strand}</td>
+          <td class="py-3 px-4 font-mono text-slate-600 text-[11px]">${sheet.deadline}</td>
+          <td class="py-3 px-4">${getStatusBadge(sheet.status)}</td>
+          <td class="py-3 px-4 text-center">
+            <button onclick="openGradeModal('${sheet.id}')" class="bg-emerald-50 hover:bg-emerald-100 text-csu-green border border-emerald-300 font-semibold text-[11px] px-3 py-1.5 rounded-lg transition">
+              <i class="fa-solid ${sheet.status === 'APPROVED' ? 'fa-eye' : 'fa-pen-to-square'} mr-1"></i>
+              ${currentRole === 'admin' ? 'Review / Decision' : (sheet.status === 'APPROVED' ? 'View Locked Sheet' : 'Encode / Edit')}
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function filterGradeSheets() {
+      const query = document.getElementById('sheetSearchInput').value.toLowerCase();
+      const status = document.getElementById('statusFilter').value;
+
+      const rows = document.querySelectorAll('#gradeSheetsTable tr');
+      rows.forEach((row, idx) => {
+        const sheet = gradeSheets[idx];
+        if (!sheet) return;
+
+        const matchesQuery = sheet.subjectCode.toLowerCase().includes(query) || sheet.subjectTitle.toLowerCase().includes(query) || sheet.section.toLowerCase().includes(query);
+        const matchesStatus = status === 'ALL' || sheet.status === status;
+
+        if (matchesQuery && matchesStatus) {
+          row.classList.remove('hidden');
+        } else {
+          row.classList.add('hidden');
+        }
+      });
+    }
+
+    // --- STATUS BADGE HELPER ---
+    function getStatusBadge(status) {
+      switch (status) {
+        case 'APPROVED':
+          return `<span class="bg-emerald-100 text-emerald-800 border border-emerald-300 text-[10px] font-bold px-2.5 py-0.5 rounded-full inline-flex items-center"><i class="fa-solid fa-lock mr-1"></i> Approved</span>`;
+        case 'SUBMITTED':
+          return `<span class="bg-amber-100 text-amber-800 border border-amber-300 text-[10px] font-bold px-2.5 py-0.5 rounded-full inline-flex items-center"><i class="fa-solid fa-hourglass-half mr-1"></i> Under Review</span>`;
+        case 'RETURNED':
+          return `<span class="bg-rose-100 text-rose-800 border border-rose-300 text-[10px] font-bold px-2.5 py-0.5 rounded-full inline-flex items-center"><i class="fa-solid fa-rotate-left mr-1"></i> Returned</span>`;
+        default:
+          return `<span class="bg-slate-100 text-slate-700 border border-slate-300 text-[10px] font-bold px-2.5 py-0.5 rounded-full inline-flex items-center"><i class="fa-solid fa-pencil mr-1"></i> Draft</span>`;
+      }
+    }
+
+    // --- GRADE ENCODING & VALIDATION MODAL LOGIC ---
+    function openGradeModal(sheetId) {
+      activeSheetId = sheetId;
+      const sheet = gradeSheets.find(s => s.id === sheetId);
+      if (!sheet) return;
+
+      document.getElementById('modalSubjectCode').innerText = sheet.subjectCode;
+      document.getElementById('modalSubjectTitle').innerText = sheet.subjectTitle;
+      document.getElementById('modalSectionBadge').innerText = `${sheet.section} - ${sheet.strand}`;
+
+      // Remarks handling
+      const remarksBanner = document.getElementById('returnedRemarksBanner');
+      if (sheet.status === 'RETURNED' && sheet.remarks) {
+        remarksBanner.classList.remove('hidden');
+        document.getElementById('modalRemarksText').innerText = `"${sheet.remarks}"`;
+      } else {
+        remarksBanner.classList.add('hidden');
+      }
+
+      // Hide validation alert initially
+      document.getElementById('validationAlert').classList.add('hidden');
+
+      // Setup Buttons based on role & status
+      const teacherActions = document.getElementById('modalTeacherActions');
+      const adminActions = document.getElementById('modalAdminActions');
+
+      if (currentRole === 'teacher') {
+        adminActions.classList.add('hidden');
+        if (sheet.status === 'APPROVED') {
+          teacherActions.classList.add('hidden'); // Locked!
+        } else {
+          teacherActions.classList.remove('hidden');
+        }
+      } else { // Admin Mode
+        teacherActions.classList.add('hidden');
+        if (sheet.status === 'SUBMITTED') {
+          adminActions.classList.remove('hidden');
+        } else {
+          adminActions.classList.add('hidden');
+        }
+      }
+
+      renderRosterRows(sheet);
+      document.getElementById('gradeModal').classList.remove('hidden');
+    }
+
+    function closeGradeModal() {
+      document.getElementById('gradeModal').classList.add('hidden');
+    }
+
+    function renderRosterRows(sheet) {
+      const tbody = document.getElementById('studentRosterBody');
+      tbody.innerHTML = '';
+
+      sheet.students.forEach((std, idx) => {
+        const computed = calculateAverage(std.midterm, std.final);
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50 transition';
+
+        const isReadOnly = (currentRole === 'admin' || sheet.status === 'APPROVED');
+
+        tr.innerHTML = `
+          <td class="p-3 text-center text-slate-400 font-bold">${idx + 1}</td>
+          <td class="p-3 font-semibold text-slate-800">${std.name}</td>
+          <td class="p-3">
+            <input type="number" step="0.1" min="65" max="100" 
+              value="${std.midterm !== null ? std.midterm : ''}" 
+              oninput="updateStudentGrade(${idx}, 'midterm', this.value)"
+              ${isReadOnly ? 'disabled' : ''}
+              class="w-full bg-slate-50 border border-slate-300 rounded px-2 py-1 text-xs font-mono font-semibold focus:outline-none focus:ring-2 focus:ring-csu-green disabled:bg-slate-100 disabled:text-slate-500" placeholder="65-100" />
+          </td>
+          <td class="p-3">
+            <input type="number" step="0.1" min="65" max="100" 
+              value="${std.final !== null ? std.final : ''}" 
+              oninput="updateStudentGrade(${idx}, 'final', this.value)"
+              ${isReadOnly ? 'disabled' : ''}
+              class="w-full bg-slate-50 border border-slate-300 rounded px-2 py-1 text-xs font-mono font-semibold focus:outline-none focus:ring-2 focus:ring-csu-green disabled:bg-slate-100 disabled:text-slate-500" placeholder="65-100" />
+          </td>
+          <td class="p-3 text-center font-bold font-mono text-xs text-slate-800" id="avg-${idx}">
+            ${computed !== null ? computed.toFixed(1) : '<span class="text-slate-300">--</span>'}
+          </td>
+          <td class="p-3 text-center" id="status-${idx}">
+            ${getGradeValidationIndicator(std.midterm, std.final)}
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function calculateAverage(m, f) {
+      if (m === null || f === null || m === '' || f === '') return null;
+      const numM = parseFloat(m);
+      const numF = parseFloat(f);
+      if (isNaN(numM) || isNaN(numF)) return null;
+      return (numM + numF) / 2;
+    }
+
+    function getGradeValidationIndicator(m, f) {
+      if (m === null || f === null || m === '' || f === '') {
+        return `<span class="text-[10px] text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded font-semibold border border-amber-200">Incomplete</span>`;
+      }
+      const numM = parseFloat(m);
+      const numF = parseFloat(f);
+      if (numM < 65 || numM > 100 || numF < 65 || numF > 100) {
+        return `<span class="text-[10px] text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded font-bold border border-rose-200">Out of Range</span>`;
+      }
+      return `<span class="text-[10px] text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded font-semibold border border-emerald-200">Valid</span>`;
+    }
+
+    function updateStudentGrade(studentIdx, field, value) {
+      const sheet = gradeSheets.find(s => s.id === activeSheetId);
+      if (!sheet) return;
+
+      const val = value === '' ? null : parseFloat(value);
+      sheet.students[studentIdx][field] = val;
+
+      // Update computed average cell dynamically
+      const computed = calculateAverage(sheet.students[studentIdx].midterm, sheet.students[studentIdx].final);
+      document.getElementById(`avg-${studentIdx}`).innerHTML = computed !== null ? computed.toFixed(1) : '<span class="text-slate-300">--</span>';
+      document.getElementById(`status-${studentIdx}`).innerHTML = getGradeValidationIndicator(sheet.students[studentIdx].midterm, sheet.students[studentIdx].final);
+    }
+
+    // --- GRADE VALIDATION ENGINE (FR-003, UC-03) ---
+    function validateGrades(sheet) {
+      let errors = [];
+
+      sheet.students.forEach((s, i) => {
+        if (s.midterm === null || s.final === null) {
+          errors.push(`Student #${i+1} (${s.name}) has unentered/missing grades.`);
+        } else {
+          if (s.midterm < 65 || s.midterm > 100) {
+            errors.push(`Student #${i+1} (${s.name}) Midterm grade (${s.midterm}) is outside valid range (65-100).`);
+          }
+          if (s.final < 65 || s.final > 100) {
+            errors.push(`Student #${i+1} (${s.name}) Final grade (${s.final}) is outside valid range (65-100).`);
+          }
+        }
+      });
+
+      return errors;
+    }
+
+    // --- ACTIONS: SAVE DRAFT & SUBMIT ---
+    function saveDraft() {
+      const sheet = gradeSheets.find(s => s.id === activeSheetId);
+      if (!sheet) return;
+
+      sheet.status = 'DRAFT';
+      sheet.lastUpdated = new Date().toISOString().replace('T', ' ').substring(0, 16);
+
+      logAuditAction('DRAFT_SAVED', `${sheet.subjectCode} - ${sheet.section}`, 'Teacher saved a local draft.');
+      renderKPIs();
+      renderRecentActivity();
+      renderGradeSheets();
+      closeGradeModal();
+      showToast('Draft Saved', 'Grade sheet saved as draft successfully.');
+    }
+
+    function submitGradeSheet() {
+      const sheet = gradeSheets.find(s => s.id === activeSheetId);
+      if (!sheet) return;
+
+      // Run Automated Validation
+      const errors = validateGrades(sheet);
+      const alertBox = document.getElementById('validationAlert');
+
+      if (errors.length > 0) {
+        alertBox.classList.remove('hidden');
+        document.getElementById('validationMessage').innerText = errors[0]; // Show first error
+        showToast('Validation Error', 'Grade submission blocked. Please fix out-of-bounds or missing grades.', 'error');
+        return;
+      }
+
+      // If valid, proceed with submission
+      sheet.status = 'SUBMITTED';
+      sheet.remarks = ''; // Clear old remarks
+      sheet.lastUpdated = new Date().toISOString().replace('T', ' ').substring(0, 16);
+
+      logAuditAction('SUBMITTED', `${sheet.subjectCode} - ${sheet.section}`, 'Grade sheet passed validation rules and was submitted to Academic Coordinator.');
+      renderKPIs();
+      renderRecentActivity();
+      renderGradeSheets();
+      closeGradeModal();
+      showToast('Grade Sheet Submitted', 'Grade sheet passed all validation checks and was submitted for approval!');
+    }
+
+    // --- ADMIN DECISION WORKFLOW (FR-005) ---
+    function adminDecision(type) {
+      if (type === 'APPROVE') {
+        const sheet = gradeSheets.find(s => s.id === activeSheetId);
+        if (!sheet) return;
+
+        sheet.status = 'APPROVED';
+        sheet.remarks = 'Verified and officially approved.';
+        sheet.lastUpdated = new Date().toISOString().replace('T', ' ').substring(0, 16);
+
+        logAuditAction('APPROVED', `${sheet.subjectCode} - ${sheet.section}`, 'Grade sheet approved and locked for official transcript insertion.');
+        renderKPIs();
+        renderRecentActivity();
+        renderGradeSheets();
+        closeGradeModal();
+        showToast('Sheet Approved', 'Grade sheet has been approved and locked.', 'success');
+      } else if (type === 'RETURN') {
+        document.getElementById('remarksModal').classList.remove('hidden');
+      }
+    }
+
+    function closeRemarksModal() {
+      document.getElementById('remarksModal').classList.add('hidden');
+    }
+
+    function confirmReturnWithRemarks() {
+      const remarksText = document.getElementById('adminRemarksInput').value.trim();
+      if (!remarksText) {
+        alert('Please enter remarks explaining why the grade sheet is being returned.');
+        return;
+      }
+
+      const sheet = gradeSheets.find(s => s.id === activeSheetId);
+      if (!sheet) return;
+
+      sheet.status = 'RETURNED';
+      sheet.remarks = remarksText;
+      sheet.lastUpdated = new Date().toISOString().replace('T', ' ').substring(0, 16);
+
+      logAuditAction('RETURNED', `${sheet.subjectCode} - ${sheet.section}`, `Returned with remarks: "${remarksText}"`);
+      renderKPIs();
+      renderRecentActivity();
+      renderGradeSheets();
+      closeRemarksModal();
+      closeGradeModal();
+      showToast('Sheet Returned', 'Grade sheet returned to teacher for revision.', 'error');
+    }
+
+    // --- AUDIT LOGGING (FR-007) ---
+    function logAuditAction(action, sheetName, details) {
+      const userStr = currentRole === 'teacher' ? 'Luck Y Meh (Teacher)' : 'Kara Danvers (Coordinator)';
+      const timestamp = new Date().toISOString().replace('T', ' ').substring(0, 16);
+      
+      auditLogs.unshift({
+        timestamp: timestamp,
+        user: userStr,
+        action: action,
+        sheet: sheetName,
+        details: details
+      });
+
+      renderAuditLogs();
+    }
+
+    function renderAuditLogs() {
+      const container = document.getElementById('auditLogsContainer');
+      container.innerHTML = '';
+
+      auditLogs.forEach(log => {
+        let badgeColor = 'bg-slate-100 text-slate-700 border-slate-300';
+        if (log.action === 'APPROVED') badgeColor = 'bg-emerald-100 text-emerald-800 border-emerald-300';
+        if (log.action === 'SUBMITTED') badgeColor = 'bg-amber-100 text-amber-800 border-amber-300';
+        if (log.action === 'RETURNED') badgeColor = 'bg-rose-100 text-rose-800 border-rose-300';
+
+        const div = document.createElement('div');
+        div.className = 'p-3 rounded-lg border border-slate-200 text-xs flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 hover:bg-slate-50 transition';
+        div.innerHTML = `
+          <div class="space-y-1">
+            <div class="flex items-center space-x-2">
+              <span class="font-mono text-[10px] text-slate-400">${log.timestamp}</span>
+              <span class="font-bold text-slate-800">${log.sheet}</span>
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold border ${badgeColor}">${log.action}</span>
+            </div>
+            <p class="text-slate-600">${log.details}</p>
+          </div>
+          <span class="text-[11px] font-medium text-slate-500 bg-slate-100 px-2 py-1 rounded border border-slate-200">${log.user}</span>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    // --- DEADLINES RENDER ---
+    function renderDeadlines() {
+      const container = document.getElementById('deadlinesList');
+      container.innerHTML = `
+        <div class="p-4 rounded-xl border border-slate-200 flex items-center justify-between bg-gradient-to-r from-amber-50/50 to-white">
+          <div class="space-y-1">
+            <div class="flex items-center space-x-2">
+              <span class="text-xs font-bold text-amber-900">1st Quarter Midterm Grades</span>
+              <span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded">Grade 11 & 12</span>
+            </div>
+            <p class="text-xs text-slate-500">Cutoff date for all Senior High subjects</p>
+          </div>
+          <div class="text-right">
+            <span class="font-mono font-bold text-sm text-slate-800 block">Oct 30, 2026</span>
+            <span class="text-[10px] text-amber-700 font-semibold bg-amber-100 px-2 py-0.5 rounded">Active Cutoff</span>
+          </div>
+        </div>
+
+        <div class="p-4 rounded-xl border border-slate-200 flex items-center justify-between bg-white">
+          <div class="space-y-1">
+            <div class="flex items-center space-x-2">
+              <span class="text-xs font-bold text-slate-800">1st Quarter Final Submissions</span>
+              <span class="bg-slate-100 text-slate-700 text-[10px] font-bold px-2 py-0.5 rounded">Grade 12 Only</span>
+            </div>
+            <p class="text-xs text-slate-500">Graduating batch early submission deadline</p>
+          </div>
+          <div class="text-right">
+            <span class="font-mono font-bold text-sm text-slate-800 block">Nov 15, 2026</span>
+            <span class="text-[10px] text-slate-500 font-medium">Upcoming</span>
+          </div>
+        </div>
+      `;
+    }
+
+    function openDeadlineModal() {
+      showToast('Admin Feature', 'Deadline configuration modal triggered.');
+    }
+
+    // --- TOAST NOTIFICATIONS ---
+    function showToast(title, message, type = 'success') {
+      const toast = document.getElementById('toast');
+      const toastTitle = document.getElementById('toastTitle');
+      const toastMessage = document.getElementById('toastMessage');
+      const toastIcon = document.getElementById('toastIcon');
+
+      toastTitle.innerText = title;
+      toastMessage.innerText = message;
+
+      if (type === 'error') {
+        toastIcon.className = 'fa-solid fa-circle-xmark text-rose-400 text-base';
+      } else {
+        toastIcon.className = 'fa-solid fa-circle-check text-emerald-400 text-base';
+      }
+
+      toast.classList.remove('translate-y-20', 'opacity-0');
+      setTimeout(() => {
+        toast.classList.add('translate-y-20', 'opacity-0');
+      }, 3500);
+    }
+  </script>
+</body>
+</html>
